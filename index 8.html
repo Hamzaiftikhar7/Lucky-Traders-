@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lucky Traders — Rice Trading Management</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  *, *::before, *::after { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: #080e1a; min-height: 100vh; }
+
+  /* Glass */
+  .glass { background: rgba(255,255,255,0.045); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,0.09); }
+  .glass-dark { background: rgba(0,0,0,0.35); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,0.07); }
+
+  /* Nav Tabs */
+  .tab-btn { padding: 10px 22px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.22s; letter-spacing: 0.3px; }
+  .tab-btn.active { background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; box-shadow: 0 4px 18px rgba(245,158,11,0.35); }
+  .tab-btn.inactive { background: rgba(255,255,255,0.055); color: #94a3b8; }
+  .tab-btn.inactive:hover { background: rgba(255,255,255,0.1); color: #e2e8f0; }
+
+  /* Input */
+  .inp { background: rgba(255,255,255,0.065); border: 1.5px solid rgba(255,255,255,0.13); color: #f1f5f9; border-radius: 9px; padding: 11px 15px; width: 100%; outline: none; transition: all 0.2s; font-size: 14px; }
+  .inp:focus { border-color: #f59e0b; background: rgba(255,255,255,0.095); box-shadow: 0 0 0 3px rgba(245,158,11,0.14); }
+  .inp::placeholder { color: #475569; }
+  select.inp option { background: #1e293b; color: #f1f5f9; }
+
+  /* Buttons */
+  .btn-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #0a0a0a; font-weight: 800; border: none; cursor: pointer; border-radius: 9px; padding: 11px 22px; transition: all 0.2s; font-size: 14px; letter-spacing: 0.3px; }
+  .btn-gold:hover:not(:disabled) { background: linear-gradient(135deg, #fbbf24, #f59e0b); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(245,158,11,0.4); }
+  .btn-gold:disabled { background: linear-gradient(135deg, #2d3748, #1a202c); color: #4b5563; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+  .btn-red { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; font-weight: 700; border: none; cursor: pointer; border-radius: 7px; padding: 7px 14px; transition: all 0.2s; font-size: 12.5px; }
+  .btn-red:hover { background: linear-gradient(135deg, #f87171, #ef4444); box-shadow: 0 3px 12px rgba(239,68,68,0.35); }
+  .btn-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; font-weight: 700; border: none; cursor: pointer; border-radius: 7px; padding: 7px 14px; transition: all 0.2s; font-size: 12.5px; }
+  .btn-blue:hover { background: linear-gradient(135deg, #60a5fa, #3b82f6); box-shadow: 0 3px 12px rgba(59,130,246,0.35); }
+  .btn-purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #fff; font-weight: 700; border: none; cursor: pointer; border-radius: 9px; padding: 10px 22px; transition: all 0.2s; font-size: 14px; }
+  .btn-purple:hover:not(:disabled) { background: linear-gradient(135deg, #a78bfa, #8b5cf6); box-shadow: 0 4px 16px rgba(139,92,246,0.4); transform: translateY(-1px); }
+  .btn-purple:disabled { background: linear-gradient(135deg, #2d3748, #1a202c); color: #4b5563; cursor: not-allowed; }
+  .btn-sky { background: linear-gradient(135deg, #0ea5e9, #0284c7); color: #fff; font-weight: 700; border: none; cursor: pointer; border-radius: 9px; padding: 10px 22px; transition: all 0.2s; font-size: 14px; }
+  .btn-sky:hover:not(:disabled) { background: linear-gradient(135deg, #38bdf8, #0ea5e9); box-shadow: 0 4px 16px rgba(14,165,233,0.4); transform: translateY(-1px); }
+  .btn-sky:disabled { background: linear-gradient(135deg, #2d3748, #1a202c); color: #4b5563; cursor: not-allowed; }
+
+  /* Metric cards */
+  .mcard { background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(217,119,6,0.04)); border: 1px solid rgba(245,158,11,0.22); border-radius: 13px; padding: 20px 22px; }
+  .mcard-red { background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(220,38,38,0.04)); border: 1px solid rgba(239,68,68,0.22); border-radius: 13px; padding: 20px 22px; }
+  .mcard-green { background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.04)); border: 1px solid rgba(16,185,129,0.22); border-radius: 13px; padding: 20px 22px; }
+  .mcard-blue { background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(37,99,235,0.04)); border: 1px solid rgba(59,130,246,0.22); border-radius: 13px; padding: 20px 22px; }
+  .mcard-purple { background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(124,58,237,0.04)); border: 1px solid rgba(139,92,246,0.22); border-radius: 13px; padding: 20px 22px; }
+
+  /* Table */
+  .trow { border-bottom: 1px solid rgba(255,255,255,0.055); transition: background 0.15s; }
+  .trow:last-child { border-bottom: none; }
+  .trow:hover { background: rgba(245,158,11,0.04); }
+
+  /* Badges */
+  .badge { display: inline-block; padding: 2px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.5px; }
+  .badge-green { background: rgba(16,185,129,0.14); color: #34d399; border: 1px solid rgba(16,185,129,0.28); }
+  .badge-red { background: rgba(239,68,68,0.14); color: #f87171; border: 1px solid rgba(239,68,68,0.28); }
+  .badge-yellow { background: rgba(245,158,11,0.14); color: #fbbf24; border: 1px solid rgba(245,158,11,0.28); }
+  .badge-blue { background: rgba(59,130,246,0.14); color: #93c5fd; border: 1px solid rgba(59,130,246,0.28); }
+
+  /* Modal */
+  .modal-bd { position: fixed; inset: 0; background: rgba(0,0,0,0.82); backdrop-filter: blur(10px); z-index: 9000; display: flex; align-items: center; justify-content: center; animation: fadein 0.18s; }
+  .modal-box { background: linear-gradient(145deg, #1a2540, #111827); border: 1px solid rgba(255,255,255,0.11); border-radius: 18px; padding: 36px; width: 90%; box-shadow: 0 30px 70px rgba(0,0,0,0.6); }
+  @keyframes fadein { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+
+  /* Admin sub-tabs */
+  .atab { padding: 11px 24px; font-size: 13.5px; font-weight: 600; cursor: pointer; border: none; background: transparent; border-bottom: 2.5px solid transparent; transition: all 0.2s; }
+  .atab.on { color: #f59e0b; border-bottom-color: #f59e0b; background: rgba(245,158,11,0.08); }
+  .atab.off { color: #64748b; }
+  .atab.off:hover { color: #94a3b8; background: rgba(255,255,255,0.04); }
+
+  /* Section label */
+  .slabel { font-size: 10.5px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; color: #f59e0b; margin-bottom: 15px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(245,158,11,0.35); border-radius: 3px; }
+
+  /* Print */
+  @media print {
+    body > *:not(#print-area) { display: none !important; }
+    #print-area { display: block !important; position: static !important; background: white; }
+  }
+
+  /* Divider */
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(245,158,11,0.3), transparent); margin: 24px 0; }
+
+  /* Highlight row */
+  input[type=checkbox] { accent-color: #f59e0b; cursor: pointer; }
+
+  /* Animated gradient header */
+  .header-bg { background: linear-gradient(135deg, #111827 0%, #1a2540 50%, #111827 100%); border-bottom: 1px solid rgba(245,158,11,0.2); }
+
+  /* No-scroll on modal open */
+  body.modal-open { overflow: hidden; }
+
+  /* Tooltip-style info text */
+  .info-text { font-size: 12px; color: #64748b; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<!-- ====================================================
+     PRINT AREA (hidden except when printing)
+===================================================== -->
+<div id="print-area" style="display:none;"></div>
+
+<!-- ====================================================
+     LOGIN MODAL
+===================================================== -->
+<div id="m-login" class="modal-bd" style="z-index:99999;">
+  <div class="modal-box" style="max-width:430px; text-align:center;">
+    <div style="font-size:52px; line-height:1; margin-bottom:10px; filter:drop-shadow(0 0 18px rgba(245,158,11,0.5));">🌾</div>
+    <h1 style="font-size:28px; font-weight:900; color:#f59e0b; letter-spacing:3px; margin-bottom:4px;">LUCKY TRADERS</h1>
+    <p style="color:#94a3b8; font-size:13px; margin-bottom:6px;">Rice Trading Management System</p>
+    <p style="color:#475569; font-size:11.5px; margin-bottom:28px; letter-spacing:1px;">AUTHORIZED PERSONNEL ONLY</p>
+    <div style="text-align:left; margin-bottom:14px;">
+      <label style="font-size:11px; font-weight:700; color:#64748b; letter-spacing:2px; text-transform:uppercase; display:block; margin-bottom:7px;">System Access Password</label>
+      <input type="password" id="login-pw" class="inp" style="font-size:16px; letter-spacing:4px; text-align:center;" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div id="login-err" style="display:none; color:#f87171; font-size:13px; margin-bottom:12px; padding:10px; background:rgba(239,68,68,0.1); border-radius:8px; border:1px solid rgba(239,68,68,0.25);">
+      ⚠️ Incorrect password. Access denied.
+    </div>
+    <button class="btn-gold" style="width:100%; padding:14px; font-size:15px;" onclick="doLogin()">🔐 Unlock System</button>
+    <p style="color:#334155; font-size:11px; margin-top:18px;">Lucky Traders © 2024 — All rights reserved</p>
+  </div>
+</div>
+
+<!-- ====================================================
+     DELETE SECURITY MODAL
+===================================================== -->
+<div id="m-delete" class="modal-bd" style="display:none;">
+  <div class="modal-box" style="max-width:420px; text-align:center;">
+    <div style="font-size:44px; margin-bottom:10px;">🔐</div>
+    <h2 style="font-size:20px; font-weight:800; color:#f87171; margin-bottom:6px;">Delete Authorization</h2>
+    <p style="color:#94a3b8; font-size:13px; margin-bottom:20px;">This action is irreversible. Enter the security key to permanently delete this record.</p>
+    <input type="password" id="del-key" class="inp" style="text-align:center; margin-bottom:10px; font-size:15px; letter-spacing:3px;" placeholder="Security key" onkeydown="if(event.key==='Enter')confirmDelete()">
+    <div id="del-err" style="display:none; color:#f87171; font-size:13px; margin-bottom:12px; padding:9px; background:rgba(239,68,68,0.1); border-radius:8px; border:1px solid rgba(239,68,68,0.25);">⚠️ Incorrect security key.</div>
+    <div style="display:flex; gap:10px; margin-top:4px;">
+      <button class="btn-red" style="flex:1; padding:12px; font-size:14px;" onclick="confirmDelete()">🗑️ Confirm Delete</button>
+      <button style="flex:1; padding:12px; border-radius:9px; background:rgba(255,255,255,0.07); color:#94a3b8; border:none; cursor:pointer; font-weight:700; font-size:14px;" onclick="cancelDelete()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================
+     ADMIN ACCESS MODAL
+===================================================== -->
+<div id="m-admin" class="modal-bd" style="display:none;">
+  <div class="modal-box" style="max-width:400px; text-align:center;">
+    <div style="font-size:44px; margin-bottom:10px;">🛡️</div>
+    <h2 style="font-size:20px; font-weight:800; color:#f59e0b; margin-bottom:6px;">Admin Access Required</h2>
+    <p style="color:#94a3b8; font-size:13px; margin-bottom:20px;">Enter the master admin password to access the restricted dashboard.</p>
+    <input type="password" id="adm-key" class="inp" style="text-align:center; margin-bottom:10px; font-size:15px; letter-spacing:3px;" placeholder="Admin password" onkeydown="if(event.key==='Enter')confirmAdmin()">
+    <div id="adm-err" style="display:none; color:#f87171; font-size:13px; margin-bottom:12px; padding:9px; background:rgba(239,68,68,0.1); border-radius:8px; border:1px solid rgba(239,68,68,0.25);">⚠️ Incorrect admin password.</div>
+    <div style="display:flex; gap:10px; margin-top:4px;">
+      <button class="btn-gold" style="flex:1; padding:12px; font-size:14px;" onclick="confirmAdmin()">Access Dashboard</button>
+      <button style="flex:1; padding:12px; border-radius:9px; background:rgba(255,255,255,0.07); color:#94a3b8; border:none; cursor:pointer; font-weight:700; font-size:14px;" onclick="cancelAdmin()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================
+     EDIT / PAYMENT MODAL
+===================================================== -->
+<div id="m-edit" class="modal-bd" style="display:none;">
+  <div class="modal-box" style="max-width:580px; max-height:92vh; overflow-y:auto;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:22px;">
+      <div>
+        <h2 style="font-size:19px; font-weight:800; color:#f59e0b;">📋 Payment Entry — Credit Account</h2>
+        <p style="color:#64748b; font-size:12px; margin-top:2px;">Customer data is read-only. Enter payment to update balance.</p>
+      </div>
+      <button onclick="closeEdit()" style="background:rgba(255,255,255,0.07); border:none; color:#94a3b8; width:34px; height:34px; border-radius:8px; cursor:pointer; font-size:20px; line-height:1; display:flex; align-items:center; justify-content:center;">&times;</button>
+    </div>
+    <!-- Read-only fields -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+      <div>
+        <label style="font-size:11px; color:#475569; font-weight:700; text-transform:uppercase; letter-spacing:1.5px;">Customer Name</label>
+        <div id="e-name" style="margin-top:6px; padding:10px 14px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.07); border-radius:8px; color:#94a3b8; font-size:14px; font-weight:600;"></div>
+      </div>
+      <div>
+        <label style="font-size:11px; color:#475569; font-weight:700; text-transform:uppercase; letter-spacing:1.5px;">Mobile Number</label>
+        <div id="e-mob" style="margin-top:6px; padding:10px 14px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.07); border-radius:8px; color:#94a3b8; font-size:14px;"></div>
+      </div>
+      <div>
+        <label style="font-size:11px; color:#475569; font-weight:700; text-transform:uppercase; letter-spacing:1.5px;">Rice Type</label>
+        <div id="e-rice" style="margin-top:6px; padding:10px 14px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.07); border-radius:8px; color:#94a3b8; font-size:14px;"></div>
+      </div>
+      <div>
+        <label style="font-size:11px; color:#475569; font-weight:700; text-transform:uppercase; letter-spacing:1.5px;">Address</label>
+        <div id="e-addr" style="margin-top:6px; padding:10px 14px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.07); border-radius:8px; color:#94a3b8; font-size:14px;"></div>
+      </div>
+      <div>
+        <label style="font-size:11px; color:#475569; font-weight:700; text-transform:uppercase; letter-spacing:1.5px;">CNIC</label>
+        <div id="e-cnic" style="margin-top:6px; padding:10px 14px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.07); border-radius:8px; color:#94a3b8; font-size:14px;"></div>
+      </div>
+      <div>
+        <label style="font-size:11px; color:#475569; font-weight:700; text-transform:uppercase; letter-spacing:1.5px;">Total Bill</label>
+        <div id="e-total" style="margin-top:6px; padding:10px 14px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.07); border-radius:8px; color:#f59e0b; font-size:14px; font-weight:800;"></div>
+      </div>
+    </div>
+    <!-- Balance Summary -->
+    <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px 20px; margin-bottom:18px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <span style="color:#64748b; font-size:13px;">Total Paid So Far:</span>
+        <span id="e-paid" style="color:#34d399; font-weight:800; font-size:16px;"></span>
+      </div>
+      <div style="height:1px; background:rgba(255,255,255,0.06); margin-bottom:10px;"></div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="color:#94a3b8; font-size:13px; font-weight:600;">Current Remaining Balance:</span>
+        <span id="e-bal" style="color:#fbbf24; font-weight:900; font-size:22px;"></span>
+      </div>
+    </div>
+    <!-- Payment input -->
+    <div style="margin-bottom:14px;">
+      <label style="font-size:11px; font-weight:800; color:#f59e0b; text-transform:uppercase; letter-spacing:2px; display:block; margin-bottom:8px;">Add Payment Amount *</label>
+      <input type="number" id="e-pay" class="inp" style="font-size:16px; font-weight:700;" placeholder="Enter collected payment amount..." min="0" step="1" oninput="validatePay()">
+      <div id="e-pay-err" style="display:none; color:#f87171; font-size:13px; margin-top:8px; padding:10px 14px; background:rgba(239,68,68,0.1); border-radius:8px; border:1px solid rgba(239,68,68,0.25);"></div>
+    </div>
+    <div style="margin-bottom:20px;">
+      <label style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:2px; display:block; margin-bottom:8px;">Payment Note (Optional)</label>
+      <input type="text" id="e-note" class="inp" placeholder="e.g. Monthly collection, partial payment...">
+    </div>
+    <!-- Payment history accordion -->
+    <div style="margin-bottom:20px;">
+      <div id="pay-hist-toggle" onclick="togglePayHist()" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:rgba(255,255,255,0.04); border-radius:8px; border:1px solid rgba(255,255,255,0.07);">
+        <span style="font-size:12.5px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1.5px;">Payment History</span>
+        <span id="hist-arrow" style="color:#64748b; font-size:16px;">▼</span>
+      </div>
+      <div id="pay-hist-body" style="display:none; margin-top:8px; max-height:160px; overflow-y:auto;">
+        <table style="width:100%; font-size:12.5px; border-collapse:collapse;">
+          <thead>
+            <tr style="background:rgba(245,158,11,0.08);">
+              <th style="text-align:left; padding:7px 10px; color:#f59e0b;">Date</th>
+              <th style="text-align:left; padding:7px 10px; color:#f59e0b;">Amount</th>
+              <th style="text-align:left; padding:7px 10px; color:#f59e0b;">Note</th>
+            </tr>
+          </thead>
+          <tbody id="pay-hist-rows"></tbody>
+        </table>
+      </div>
+    </div>
+    <div style="display:flex; gap:12px;">
+      <button class="btn-gold" style="flex:1; padding:13px; font-size:14px;" onclick="savePayment()">💾 Save Payment</button>
+      <button style="flex:1; padding:13px; border-radius:9px; background:rgba(255,255,255,0.07); color:#94a3b8; border:none; cursor:pointer; font-weight:700; font-size:14px;" onclick="closeEdit()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================
+     MAIN APPLICATION
+===================================================== -->
+<div id="app" style="display:none;">
+
+  <!-- TOP HEADER BAR -->
+  <div class="header-bg" style="padding:14px 24px;">
+    <div style="max-width:1400px; margin:0 auto; display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <div style="font-size:38px; line-height:1; filter:drop-shadow(0 0 14px rgba(245,158,11,0.5));">🌾</div>
+        <div>
+          <h1 style="font-size:22px; font-weight:900; color:#f59e0b; letter-spacing:3px; margin:0; line-height:1.1;">LUCKY TRADERS</h1>
+          <p style="color:#475569; font-size:11px; font-weight:600; letter-spacing:1.8px; margin:2px 0 0 0; text-transform:uppercase;">Rice Trading Management System</p>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div style="text-align:right;">
+          <div style="font-size:10.5px; color:#475569; font-weight:600; letter-spacing:1px; text-transform:uppercase;">Contact</div>
+          <div style="font-size:15px; font-weight:800; color:#f59e0b; letter-spacing:1px;">03009687094</div>
+        </div>
+        <div style="width:1px; height:36px; background:rgba(255,255,255,0.08);"></div>
+        <button onclick="lockApp()" style="display:flex; align-items:center; gap:7px; padding:9px 16px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); border-radius:9px; color:#f87171; font-weight:700; font-size:13px; cursor:pointer; transition:all 0.2s;" onmouseenter="this.style.background='rgba(239,68,68,0.2)'" onmouseleave="this.style.background='rgba(239,68,68,0.1)'">🔒 Lock</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVIGATION TABS -->
+  <div style="background:rgba(0,0,0,0.25); border-bottom:1px solid rgba(255,255,255,0.055); padding:10px 24px;">
+    <div style="max-width:1400px; margin:0 auto; display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="tab-btn active" id="nav-cash" onclick="goTab('cash')">💵 Cash Sales</button>
+      <button class="tab-btn inactive" id="nav-credit" onclick="goTab('credit')">📒 Credit Ledger</button>
+      <button class="tab-btn inactive" id="nav-search" onclick="goTab('search')">🔍 Collection Routing</button>
+      <button class="tab-btn inactive" id="nav-admin" onclick="reqAdmin()">🛡️ Admin Dashboard</button>
+    </div>
+  </div>
+
+  <!-- CONTENT WRAPPER -->
+  <div style="max-width:1400px; margin:0 auto; padding:28px 24px;">
+
+    <!-- ==============================
+         CASH SALES SECTION
+    ============================== -->
+    <div id="sec-cash">
+      <div class="slabel">New Cash Sale Transaction</div>
+      <div class="glass" style="border-radius:16px; padding:28px; margin-bottom:28px;">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-bottom:20px;">
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; display:block; margin-bottom:8px;">Rice Type *</label>
+            <input type="text" id="c-rice" class="inp" placeholder="e.g. Basmati 1121, IRRI-6..." oninput="vCash()">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; display:block; margin-bottom:8px;">Quantity (kg) *</label>
+            <input type="number" id="c-qty" class="inp" placeholder="Enter kg amount" min="0" step="0.01" oninput="calcCash();vCash()">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; display:block; margin-bottom:8px;">Price per kg (Rs.) *</label>
+            <input type="number" id="c-price" class="inp" placeholder="Enter price per kg" min="0" step="0.01" oninput="calcCash();vCash()">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; display:block; margin-bottom:8px;">Customer Name *</label>
+            <input type="text" id="c-name" class="inp" placeholder="Full customer name" oninput="vCash()">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; display:block; margin-bottom:8px;">Mobile Number *</label>
+            <input type="text" id="c-mob" class="inp" placeholder="e.g. 03001234567" oninput="vCash()">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; display:block; margin-bottom:8px;">Location *</label>
+            <input type="text" id="c-loc" class="inp" placeholder="City / Area / Village" oninput="vCash()">
+          </div>
+        </div>
+        <!-- Total display -->
+        <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(245,158,11,0.2); border-radius:12px; padding:18px 22px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:11px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:4px;">Calculated Total Bill</div>
+            <div style="font-size:11px; color:#475569;">Quantity × Price per kg</div>
+          </div>
+          <div id="cash-total-disp" style="font-size:32px; font-weight:900; color:#f59e0b; letter-spacing:1px;">Rs. 0.00</div>
+        </div>
+        <button id="cash-btn" class="btn-gold" style="width:100%; padding:14px; font-size:15px;" disabled onclick="saveCash()">💾 Save &amp; Print Receipt</button>
+      </div>
+
+      <!-- Cash Records -->
+      <div class="slabel">Cash Sales Records</div>
+      <div class="glass" style="border-radius:16px; overflow:hidden;">
+        <div style="overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse; font-size:13.5px;">
+            <thead style="background:rgba(245,158,11,0.09);">
+              <tr>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">#</th>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">Date &amp; Time</th>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">Customer</th>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">Rice Type</th>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">Qty (kg)</th>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">Price/kg</th>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">Total Bill</th>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">Location</th>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="cash-tbody"><tr><td colspan="9" style="text-align:center; padding:50px 20px; color:#334155; font-size:14px;">No cash sales recorded yet. Start by adding a new transaction above.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==============================
+         CREDIT LEDGER SECTION
+    ============================== -->
+    <div id="sec-credit" style="display:none;">
+      <div class="slabel">New Credit Entry</div>
+      <div class="glass" style="border-radius:16px; padding:28px; margin-bottom:28px;">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-bottom:20px;">
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; display:block; margin-bottom:8px;">Rice Type *</label>
+            <input type="text" id="cr-rice" class="inp" placeholder="e.g. Basmati 1121, IRRI-6..." oninput="vCredit()">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; display:block; margin-bottom:8px;">Quantity (kg) *</label>
+            <input type="number" id="cr-qty" class="inp" placeholder="Enter kg amount" min="0" step="0.01" oninput="calcCredit();vCredit()">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; display:block; margin-bottom:8px;">Price per kg (Rs.) *</label>
+            <input type="number" id="cr-price" class="inp" placeholder="Enter price per kg" min="0" step="0.01" oninput="calcCredit();vCredit()">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; display:block; margin-bottom:8px;">Customer Name *</label>
+            <input type="text" id="cr-name" class="inp" placeholder="Full customer name" oninput="vCredit()">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; display:block; margin-bottom:8px;">Mobile Number *</label>
+            <input type="text" id="cr-mob" class="inp" placeholder="e.g. 03001234567" oninput="vCredit()">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; display:block; margin-bottom:8px;">Address *</label>
+            <input type="text" id="cr-addr" class="inp" placeholder="Full delivery / customer address" oninput="vCredit()">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; display:block; margin-bottom:8px;">CNIC <span style="color:#334155; font-size:10px;">(Optional)</span></label>
+            <input type="text" id="cr-cnic" class="inp" placeholder="e.g. 35201-1234567-1">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; display:block; margin-bottom:8px;">Initial Deposit <span style="color:#334155; font-size:10px;">(Optional)</span></label>
+            <input type="number" id="cr-dep" class="inp" placeholder="Enter initial payment" min="0" step="0.01" oninput="calcCredit()">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; display:block; margin-bottom:8px;">Collection Day *</label>
+            <select id="cr-day" class="inp" onchange="vCredit()">
+              <option value="">— Select recovery day —</option>
+              <option value="Saturday">Saturday</option>
+              <option value="Sunday">Sunday</option>
+              <option value="Monday">Monday</option>
+              <option value="Tuesday">Tuesday</option>
+              <option value="Wednesday">Wednesday</option>
+              <option value="Thursday">Thursday</option>
+            </select>
+          </div>
+        </div>
+        <!-- Credit Calculation Summary -->
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px;">
+          <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(245,158,11,0.18); border-radius:11px; padding:14px 16px; text-align:center;">
+            <div style="font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:5px;">Total Bill</div>
+            <div id="cr-total-d" style="font-size:20px; font-weight:900; color:#f59e0b;">Rs. 0.00</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(16,185,129,0.18); border-radius:11px; padding:14px 16px; text-align:center;">
+            <div style="font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:5px;">Initial Deposit</div>
+            <div id="cr-dep-d" style="font-size:20px; font-weight:900; color:#34d399;">Rs. 0.00</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(239,68,68,0.18); border-radius:11px; padding:14px 16px; text-align:center;">
+            <div style="font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:5px;">Remaining Balance</div>
+            <div id="cr-bal-d" style="font-size:20px; font-weight:900; color:#f87171;">Rs. 0.00</div>
+          </div>
+        </div>
+        <button id="credit-btn" class="btn-gold" style="width:100%; padding:14px; font-size:15px;" disabled onclick="saveCredit()">💾 Save Credit Entry</button>
+      </div>
+
+      <!-- Credit Ledger Table -->
+      <div class="slabel">Credit Ledger — Active Accounts</div>
+      <div class="glass" style="border-radius:16px; overflow:hidden;">
+        <div style="overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse; font-size:13.5px;">
+            <thead style="background:rgba(245,158,11,0.09);">
+              <tr>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">#</th>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">Date</th>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">Customer</th>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">Mobile</th>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">Rice Type</th>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">Qty (kg)</th>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">Total Bill</th>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">Paid</th>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">Balance</th>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">Day</th>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">Status</th>
+                <th style="text-align:left; padding:13px 16px; color:#f59e0b; font-weight:700; white-space:nowrap;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="credit-tbody"><tr><td colspan="12" style="text-align:center; padding:50px 20px; color:#334155; font-size:14px;">No credit entries recorded yet. Add a new credit account above.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==============================
+         COLLECTION ROUTING SECTION
+    ============================== -->
+    <div id="sec-search" style="display:none;">
+      <div class="slabel">Collection Routing — Filter by Recovery Day</div>
+      <div class="glass" style="border-radius:16px; padding:22px 28px; margin-bottom:20px;">
+        <div style="display:flex; flex-wrap:wrap; gap:20px; align-items:flex-end;">
+          <div style="flex:1; min-width:220px;">
+            <label style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; display:block; margin-bottom:8px;">Select Recovery Day</label>
+            <select id="s-day" class="inp" style="max-width:320px;" onchange="filterDay()">
+              <option value="">— Choose a day —</option>
+              <option value="Saturday">Saturday</option>
+              <option value="Sunday">Sunday</option>
+              <option value="Monday">Monday</option>
+              <option value="Tuesday">Tuesday</option>
+              <option value="Wednesday">Wednesday</option>
+              <option value="Thursday">Thursday</option>
+            </select>
+          </div>
+          <div id="s-count" style="font-size:13px; color:#475569; padding-bottom:11px;">Select a day to view assigned customers.</div>
+        </div>
+      </div>
+
+      <!-- Action Bar -->
+      <div id="s-actions" style="display:none; margin-bottom:16px; flex-wrap:wrap; gap:10px; align-items:center;">
+        <button id="s-export" class="btn-sky" disabled onclick="exportWord()" style="display:flex; align-items:center; gap:8px;">📄 Export Selected to Word</button>
+        <button id="s-print" class="btn-purple" disabled onclick="printRoute()" style="display:flex; align-items:center; gap:8px;">🖨️ Print Collection Sheet</button>
+        <span id="s-sel-badge" style="font-size:13px; color:#64748b; margin-left:4px;"></span>
+      </div>
+
+      <!-- Results Table -->
+      <div id="s-results" style="display:none;">
+        <div class="glass" style="border-radius:16px; overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:13.5px;">
+              <thead style="background:rgba(245,158,11,0.09);">
+                <tr>
+                  <th style="padding:13px 16px; text-align:center;">
+                    <input type="checkbox" id="sel-all" onchange="toggleAll()" style="width:15px; height:15px;">
+                  </th>
+                  <th style="text-align:left; padding:13px 10px; color:#f59e0b; font-weight:700; white-space:nowrap;">#</th>
+                  <th style="text-align:left; padding:13px 10px; color:#f59e0b; font-weight:700; white-space:nowrap;">Customer Name</th>
+                  <th style="text-align:left; padding:13px 10px; color:#f59e0b; font-weight:700; white-space:nowrap;">Mobile</th>
+                  <th style="text-align:left; padding:13px 10px; color:#f59e0b; font-weight:700; white-space:nowrap;">Address</th>
+                  <th style="text-align:left; padding:13px 10px; color:#f59e0b; font-weight:700; white-space:nowrap;">Rice Type</th>
+                  <th style="text-align:left; padding:13px 10px; color:#f59e0b; font-weight:700; white-space:nowrap;">Total Bill</th>
+                  <th style="text-align:left; padding:13px 10px; color:#f59e0b; font-weight:700; white-space:nowrap;">Remaining Balance</th>
+                  <th style="text-align:left; padding:13px 10px; color:#f59e0b; font-weight:700; white-space:nowrap;">Status</th>
+                  <th style="text-align:left; padding:13px 10px; color:#f59e0b; font-weight:700; white-space:nowrap;">Edit</th>
+                </tr>
+              </thead>
+              <tbody id="s-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div id="s-empty" style="display:none; text-align:center; padding:70px 20px;">
+        <div style="font-size:52px; margin-bottom:12px;">📭</div>
+        <div style="font-size:16px; font-weight:700; color:#334155;">No customers assigned to this collection day.</div>
+      </div>
+    </div>
+
+    <!-- ==============================
+         ADMIN DASHBOARD SECTION
+    ============================== -->
+    <div id="sec-admin" style="display:none;">
+      <div class="slabel">Admin Dashboard — Restricted Access</div>
+
+      <!-- Admin Tab Bar -->
+      <div style="display:flex; border-bottom:1px solid rgba(255,255,255,0.07); margin-bottom:24px; overflow-x:auto;">
+        <button class="atab on" id="atab-cash" onclick="switchAdm('cash')">💵 Cash Admin</button>
+        <button class="atab off" id="atab-credit" onclick="switchAdm('credit')">📒 Credit Admin</button>
+        <button class="atab off" id="atab-personal" onclick="switchAdm('personal')">👤 Personal Admin</button>
+      </div>
+
+      <!-- === CASH ADMIN === -->
+      <div id="adm-cash">
+        <div class="slabel">Cash Revenue Analytics</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; margin-bottom:28px;">
+          <div class="mcard">
+            <div style="font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px;">📅 Weekly Revenue</div>
+            <div id="ac-wrev" style="font-size:24px; font-weight:900; color:#f59e0b; margin-bottom:4px;">Rs. 0.00</div>
+            <div id="ac-wqty" style="font-size:12.5px; color:#64748b;">0.00 kg sold this week</div>
+            <div id="ac-wcnt" style="font-size:11.5px; color:#334155; margin-top:3px;">0 transactions</div>
+          </div>
+          <div class="mcard">
+            <div style="font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px;">📆 Monthly Revenue</div>
+            <div id="ac-mrev" style="font-size:24px; font-weight:900; color:#f59e0b; margin-bottom:4px;">Rs. 0.00</div>
+            <div id="ac-mqty" style="font-size:12.5px; color:#64748b;">0.00 kg sold this month</div>
+            <div id="ac-mcnt" style="font-size:11.5px; color:#334155; margin-top:3px;">0 transactions</div>
+          </div>
+          <div class="mcard">
+            <div style="font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px;">🗓️ Yearly Revenue</div>
+            <div id="ac-yrev" style="font-size:24px; font-weight:900; color:#f59e0b; margin-bottom:4px;">Rs. 0.00</div>
+            <div id="ac-yqty" style="font-size:12.5px; color:#64748b;">0.00 kg sold this year</div>
+            <div id="ac-ycnt" style="font-size:11.5px; color:#334155; margin-top:3px;">0 transactions</div>
+          </div>
+        </div>
+        <div class="slabel">All Cash Transactions</div>
+        <div class="glass" style="border-radius:16px; overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:13.5px;">
+              <thead style="background:rgba(245,158,11,0.09);">
+                <tr>
+                  <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">#</th>
+                  <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Date &amp; Time</th>
+                  <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Customer</th>
+                  <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Mobile</th>
+                  <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Rice Type</th>
+                  <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Qty (kg)</th>
+                  <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Total</th>
+                  <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Location</th>
+                </tr>
+              </thead>
+              <tbody id="ac-tbody"><tr><td colspan="8" style="text-align:center; padding:40px; color:#334155;">No cash sales yet.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- === CREDIT ADMIN === -->
+      <div id="adm-credit" style="display:none;">
+        <div class="slabel">Credit Master Metrics</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-bottom:28px;">
+          <div class="mcard">
+            <div style="font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px;">Total Credit Invoices</div>
+            <div id="ccm-rev" style="font-size:22px; font-weight:900; color:#f59e0b;">Rs. 0.00</div>
+          </div>
+          <div class="mcard-red">
+            <div style="font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px;">Outstanding Market Debt</div>
+            <div id="ccm-debt" style="font-size:22px; font-weight:900; color:#f87171;">Rs. 0.00</div>
+          </div>
+          <div class="mcard-green">
+            <div style="font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px;">Total Amount Recovered</div>
+            <div id="ccm-rec" style="font-size:22px; font-weight:900; color:#34d399;">Rs. 0.00</div>
+          </div>
+          <div class="mcard-blue">
+            <div style="font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px;">Total Credit Accounts</div>
+            <div id="ccm-cnt" style="font-size:22px; font-weight:900; color:#93c5fd;">0</div>
+          </div>
+        </div>
+
+        <!-- Credit Sub-tabs -->
+        <div style="display:flex; border-bottom:1px solid rgba(255,255,255,0.07); margin-bottom:20px; overflow-x:auto;">
+          <button class="atab on" id="ctab-nil" onclick="switchCAdm('nil')">✅ Nil Balance</button>
+          <button class="atab off" id="ctab-deleted" onclick="switchCAdm('deleted')">🗑️ Deleted Log</button>
+          <button class="atab off" id="ctab-history" onclick="switchCAdm('history')">🕐 10-Day Edit History</button>
+          <button class="atab off" id="ctab-details" onclick="switchCAdm('details')">📊 Details</button>
+        </div>
+
+        <!-- Nil Tab -->
+        <div id="cadm-nil">
+          <div class="glass" style="border-radius:16px; overflow:hidden;">
+            <div style="overflow-x:auto;">
+              <table style="width:100%; border-collapse:collapse; font-size:13.5px;">
+                <thead style="background:rgba(245,158,11,0.09);">
+                  <tr>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Customer</th>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Mobile</th>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Rice Type</th>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Qty (kg)</th>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Total Bill</th>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Day</th>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Entry Date</th>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="nil-tbody"><tr><td colspan="8" style="text-align:center; padding:40px; color:#334155;">No cleared accounts yet.</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deleted Tab -->
+        <div id="cadm-deleted" style="display:none;">
+          <div class="glass" style="border-radius:16px; overflow:hidden;">
+            <div style="overflow-x:auto;">
+              <table style="width:100%; border-collapse:collapse; font-size:13.5px;">
+                <thead style="background:rgba(245,158,11,0.09);">
+                  <tr>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Deleted At</th>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Customer</th>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Mobile</th>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Rice Type</th>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Total Bill</th>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Balance at Delete</th>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Type</th>
+                  </tr>
+                </thead>
+                <tbody id="del-tbody"><tr><td colspan="7" style="text-align:center; padding:40px; color:#334155;">No deleted records.</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- History Tab -->
+        <div id="cadm-history" style="display:none;">
+          <div class="glass" style="border-radius:16px; overflow:hidden;">
+            <div style="overflow-x:auto;">
+              <table style="width:100%; border-collapse:collapse; font-size:13.5px;">
+                <thead style="background:rgba(245,158,11,0.09);">
+                  <tr>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Timestamp</th>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Customer</th>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Collection Day</th>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Amount Paid</th>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Balance After</th>
+                    <th style="text-align:left; padding:12px 16px; color:#f59e0b; font-weight:700;">Note</th>
+                  </tr>
+                </thead>
+                <tbody id="hist-tbody"><tr><td colspan="6" style="text-align:center; padding:40px; color:#334155;">No edit history in last 10 days.</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Details Tab -->
+        <div id="cadm-details" style="display:none;">
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px;">
+            <div class="mcard" style="padding:28px;">
+              <div style="font-size:11px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:2px; margin-bottom:12px;">Total Cumulative Credit Revenue</div>
+              <div id="det-rev" style="font-size:36px; font-weight:900; color:#f59e0b; margin-bottom:8px;">Rs. 0.00</div>
+              <div style="font-size:12.5px; color:#475569;">Total value of all credit invoices ever issued to customers in the system.</div>
+            </div>
+            <div class="mcard-red" style="padding:28px;">
+              <div style="font-size:11px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:2px; margin-bottom:12px;">Total Outstanding Market Debt</div>
+              <div id="det-debt" style="font-size:36px; font-weight:900; color:#f87171; margin-bottom:8px;">Rs. 0.00</div>
+              <div style="font-size:12.5px; color:#475569;">Total remaining unpaid balances across all active credit accounts in the market.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- === PERSONAL ADMIN === -->
+      <div id="adm-personal" style="display:none;">
+        <div class="slabel">Unified Store Performance Metrics</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px;">
+          <div class="mcard" style="padding:22px;">
+            <div style="font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px;">Total Consolidated Revenue</div>
+            <div id="pa-rev" style="font-size:26px; font-weight:900; color:#f59e0b; margin-bottom:4px;">Rs. 0.00</div>
+            <div style="font-size:12px; color:#475569;">Cash sales + All credit invoices</div>
+          </div>
+          <div class="mcard-blue" style="padding:22px;">
+            <div style="font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px;">Master Quantity Sold</div>
+            <div id="pa-qty" style="font-size:26px; font-weight:900; color:#93c5fd; margin-bottom:4px;">0 kg</div>
+            <div style="font-size:12px; color:#475569;">Cash + Credit combined totals</div>
+          </div>
+          <div class="mcard-green" style="padding:22px;">
+            <div style="font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px;">Total Cash Collected</div>
+            <div id="pa-coll" style="font-size:26px; font-weight:900; color:#34d399; margin-bottom:4px;">Rs. 0.00</div>
+            <div style="font-size:12px; color:#475569;">Cash revenue + Credit payments received</div>
+          </div>
+          <div class="mcard-red" style="padding:22px;">
+            <div style="font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px;">Outstanding Market Debt</div>
+            <div id="pa-debt" style="font-size:26px; font-weight:900; color:#f87171; margin-bottom:4px;">Rs. 0.00</div>
+            <div style="font-size:12px; color:#475569;">Total unpaid credit balances</div>
+          </div>
+          <div class="mcard-purple" style="padding:22px;">
+            <div style="font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px;">Cash Transactions Count</div>
+            <div id="pa-cc" style="font-size:26px; font-weight:900; color:#c4b5fd; margin-bottom:4px;">0</div>
+            <div style="font-size:12px; color:#475569;">Total cash sales recorded</div>
+          </div>
+          <div class="mcard" style="padding:22px;">
+            <div style="font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px;">Credit Accounts Count</div>
+            <div id="pa-crc" style="font-size:26px; font-weight:900; color:#fbbf24; margin-bottom:4px;">0</div>
+            <div style="font-size:12px; color:#475569;">Total credit accounts in ledger</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end sec-admin -->
+
+  </div><!-- end content wrapper -->
+</div><!-- end app -->
+
+<script>
+'use strict';
+// ============================================================
+// CONSTANTS & CREDENTIALS
+// ============================================================
+const PASS = 'Lucky7094';
+const DEL_KEY = 'Luckytraders@mianhamza7094';
+const ADM_KEY = 'A40B11C7';
+const DAYS = ['Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday'];
+
+// ============================================================
+// DATA LAYER — localStorage persistence
+// ============================================================
+const DB = {
+  get(k) { try { return JSON.parse(localStorage.getItem('lt_' + k)) || []; } catch { return []; } },
+  set(k, v) { localStorage.setItem('lt_' + k, JSON.stringify(v)); },
+};
+
+// ============================================================
+// HELPERS
+// ============================================================
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 9); }
+
+function fmt(n) {
+  const num = parseFloat(n) || 0;
+  return 'Rs. ' + num.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function fmtNum(n) {
+  return (parseFloat(n) || 0).toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function fmtDate(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts);
+  return d.toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' }) +
+         ' ' + d.toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' });
+}
+
+function esc(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function show(id) { document.getElementById(id).style.display = ''; }
+function hide(id) { document.getElementById(id).style.display = 'none'; }
+function showFlex(id) { document.getElementById(id).style.display = 'flex'; }
+function el(id) { return document.getElementById(id); }
+function txt(id, v) { el(id).textContent = v; }
+function val(id) { return el(id).value.trim(); }
+function numval(id) { return parseFloat(el(id).value) || 0; }
+
+// ============================================================
+// LOGIN
+// ============================================================
+let adminUnlocked = false;
+let pendingDelId = null;
+let pendingDelType = null;
+let editId = null;
+let filteredList = [];
+
+function doLogin() {
+  const pw = el('login-pw').value;
+  if (pw === PASS) {
+    hide('m-login');
+    show('app');
+    renderCashTable();
+    renderCreditTable();
+  } else {
+    show('login-err');
+    el('login-pw').value = '';
+    el('login-pw').focus();
+  }
+}
+
+function lockApp() {
+  hide('app');
+  show('m-login');
+  el('login-pw').value = '';
+  hide('login-err');
+  adminUnlocked = false;
+}
+
+// ============================================================
+// TAB NAVIGATION
+// ============================================================
+const TABS = ['cash', 'credit', 'search', 'admin'];
+
+function goTab(name) {
+  TABS.forEach(t => {
+    hide('sec-' + t);
+    const b = el('nav-' + t);
+    b.className = 'tab-btn inactive';
+  });
+  show('sec-' + name);
+  el('nav-' + name).className = 'tab-btn active';
+  if (name === 'admin' && adminUnlocked) renderAdmCash();
+}
+
+function reqAdmin() {
+  if (adminUnlocked) { goTab('admin'); return; }
+  el('adm-key').value = '';
+  hide('adm-err');
+  showFlex('m-admin');
+  setTimeout(() => el('adm-key').focus(), 80);
+}
+
+function confirmAdmin() {
+  if (el('adm-key').value === ADM_KEY) {
+    adminUnlocked = true;
+    hide('m-admin');
+    goTab('admin');
+    renderAdmCash();
+  } else {
+    show('adm-err');
+    el('adm-key').value = '';
+  }
+}
+
+function cancelAdmin() { hide('m-admin'); }
+
+// ============================================================
+// CASH SEGMENT
+// ============================================================
+function calcCash() {
+  const qty = numval('c-qty');
+  const price = numval('c-price');
+  el('cash-total-disp').textContent = fmt(qty * price);
+}
+
+function vCash() {
+  const fields = ['c-rice', 'c-qty', 'c-price', 'c-name', 'c-mob', 'c-loc'];
+  const allFilled = fields.every(id => el(id).value.trim() !== '');
+  const qOk = numval('c-qty') > 0;
+  const pOk = numval('c-price') > 0;
+  el('cash-btn').disabled = !(allFilled && qOk && pOk);
+}
+
+function saveCash() {
+  const rice = val('c-rice'), qty = numval('c-qty'), price = numval('c-price');
+  const name = val('c-name'), mob = val('c-mob'), loc = val('c-loc');
+  const total = qty * price;
+  const rec = { id: uid(), ts: Date.now(), rice, qty, price, total, name, mob, loc };
+  const arr = DB.get('cash');
+  arr.push(rec);
+  DB.set('cash', arr);
+  ['c-rice','c-qty','c-price','c-name','c-mob','c-loc'].forEach(id => el(id).value = '');
+  el('cash-total-disp').textContent = 'Rs. 0.00';
+  el('cash-btn').disabled = true;
+  renderCashTable();
+  printCashReceipt(rec);
+}
+
+function renderCashTable() {
+  const arr = DB.get('cash');
+  const tbody = el('cash-tbody');
+  if (!arr.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:50px 20px; color:#334155; font-size:14px;">No cash sales recorded yet. Start by adding a new transaction above.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = [...arr].reverse().map((s, i) => `
+    <tr class="trow">
+      <td style="padding:12px 16px; color:#64748b;">${arr.length - i}</td>
+      <td style="padding:12px 16px; color:#475569; font-size:12.5px; white-space:nowrap;">${fmtDate(s.ts)}</td>
+      <td style="padding:12px 16px; font-weight:700;">${esc(s.name)}</td>
+      <td style="padding:12px 16px; color:#94a3b8;">${esc(s.mob)}</td>
+      <td style="padding:12px 16px; color:#cbd5e1;">${esc(s.rice)}</td>
+      <td style="padding:12px 16px; color:#cbd5e1;">${fmtNum(s.qty)}</td>
+      <td style="padding:12px 16px; color:#f59e0b; font-weight:800;">${fmt(s.total)}</td>
+      <td style="padding:12px 16px; color:#94a3b8;">${esc(s.loc)}</td>
+      <td style="padding:12px 16px;">
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="btn-blue" onclick="reprintCash('${s.id}')">🖨️</button>
+          <button class="btn-red" onclick="reqDel('${s.id}','cash')">🗑️</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function reprintCash(id) {
+  const s = DB.get('cash').find(x => x.id === id);
+  if (s) printCashReceipt(s);
+}
+
+function printCashReceipt(s) {
+  const pa = el('print-area');
+  pa.style.display = 'block';
+  pa.innerHTML = `
+  <div style="font-family:'Courier New',monospace; max-width:400px; margin:0 auto; padding:24px 20px; background:#fff; color:#000;">
+    <div style="text-align:center; padding-bottom:14px; border-bottom:2px dashed #000; margin-bottom:14px;">
+      <div style="font-size:26px; font-weight:900; letter-spacing:4px; margin-bottom:4px;">LUCKY TRADERS</div>
+      <div style="font-size:13px; font-weight:700; margin-bottom:3px;">Rice Trading — Wholesale &amp; Retail</div>
+      <div style="font-size:12px; margin-bottom:2px;">Contact: 03009687094</div>
+      <div style="font-size:11px; color:#555; margin-top:3px;">OFFICIAL CASH RECEIPT</div>
+    </div>
+    <div style="font-size:12px; margin-bottom:12px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><b>Receipt Date:</b> <span>${fmtDate(s.ts)}</span></div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><b>Receipt ID:</b> <span style="font-size:10px;">${s.id.toUpperCase()}</span></div>
+    </div>
+    <div style="border-top:1px dashed #999; border-bottom:1px dashed #999; padding:10px 0; margin-bottom:12px; font-size:12px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><b>Customer Name:</b> <span>${esc(s.name)}</span></div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><b>Mobile Number:</b> <span>${esc(s.mob)}</span></div>
+      <div style="display:flex; justify-content:space-between;"><b>Location:</b> <span>${esc(s.loc)}</span></div>
+    </div>
+    <div style="font-size:12px; margin-bottom:14px;">
+      <div style="text-align:center; font-weight:900; margin-bottom:8px; font-size:13px;">── PURCHASE DETAILS ──</div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><b>Rice Type:</b> <span>${esc(s.rice)}</span></div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><b>Quantity:</b> <span>${fmtNum(s.qty)} kg</span></div>
+      <div style="display:flex; justify-content:space-between;"><b>Price per kg:</b> <span>Rs. ${fmtNum(s.price)}</span></div>
+    </div>
+    <div style="background:#000; color:#fff; padding:14px; text-align:center; border-radius:4px; margin-bottom:14px;">
+      <div style="font-size:10px; letter-spacing:3px; margin-bottom:5px;">TOTAL AMOUNT PAID</div>
+      <div style="font-size:28px; font-weight:900; letter-spacing:2px;">Rs. ${fmtNum(s.total)}</div>
+    </div>
+    <div style="text-align:center; font-size:11px; color:#555; padding-top:10px; border-top:1px dashed #999;">
+      <div style="margin-bottom:3px;">Payment Method: CASH — PAID IN FULL</div>
+      <div style="margin-bottom:3px;">Thank you for your business!</div>
+      <div>Lucky Traders — Your Trusted Rice Supplier</div>
+    </div>
+  </div>`;
+  window.print();
+  setTimeout(() => { pa.style.display = 'none'; pa.innerHTML = ''; }, 2000);
+}
+
+// ============================================================
+// CREDIT SEGMENT
+// ============================================================
+function calcCredit() {
+  const qty = numval('cr-qty'), price = numval('cr-price'), dep = numval('cr-dep');
+  const total = qty * price;
+  const bal = Math.max(0, total - dep);
+  el('cr-total-d').textContent = fmt(total);
+  el('cr-dep-d').textContent = fmt(dep);
+  el('cr-bal-d').textContent = fmt(bal);
+}
+
+function vCredit() {
+  const req = ['cr-rice','cr-qty','cr-price','cr-name','cr-mob','cr-addr'];
+  const allFilled = req.every(id => el(id).value.trim() !== '');
+  const dayOk = val('cr-day') !== '';
+  const qOk = numval('cr-qty') > 0;
+  const pOk = numval('cr-price') > 0;
+  el('credit-btn').disabled = !(allFilled && dayOk && qOk && pOk);
+}
+
+function saveCredit() {
+  const rice = val('cr-rice'), qty = numval('cr-qty'), price = numval('cr-price');
+  const name = val('cr-name'), mob = val('cr-mob'), addr = val('cr-addr');
+  const cnic = val('cr-cnic'), dep = numval('cr-dep'), day = val('cr-day');
+  const total = qty * price;
+  const bal = Math.max(0, total - dep);
+  const payHist = dep > 0 ? [{ amount: dep, note: 'Initial Deposit', ts: Date.now() }] : [];
+  const rec = { id: uid(), ts: Date.now(), rice, qty, price, total, name, mob, addr, cnic, dep, day, balance: bal, totalPaid: dep, payHist };
+  const arr = DB.get('credits');
+  arr.push(rec);
+  DB.set('credits', arr);
+  ['cr-rice','cr-qty','cr-price','cr-name','cr-mob','cr-addr','cr-cnic','cr-dep'].forEach(id => el(id).value = '');
+  el('cr-day').value = '';
+  ['cr-total-d','cr-dep-d','cr-bal-d'].forEach(id => el(id).textContent = 'Rs. 0.00');
+  el('credit-btn').disabled = true;
+  renderCreditTable();
+}
+
+function renderCreditTable() {
+  const arr = DB.get('credits');
+  const tbody = el('credit-tbody');
+  if (!arr.length) {
+    tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding:50px 20px; color:#334155; font-size:14px;">No credit entries recorded yet. Add a new credit account above.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = [...arr].reverse().map((c, i) => {
+    const cleared = c.balance <= 0;
+    const badge = cleared
+      ? '<span class="badge badge-green">CLEARED</span>'
+      : '<span class="badge badge-red">PENDING</span>';
+    return `
+    <tr class="trow">
+      <td style="padding:12px 16px; color:#64748b;">${arr.length - i}</td>
+      <td style="padding:12px 16px; color:#475569; font-size:12px; white-space:nowrap;">${fmtDate(c.ts)}</td>
+      <td style="padding:12px 16px; font-weight:700;">${esc(c.name)}</td>
+      <td style="padding:12px 16px; color:#94a3b8;">${esc(c.mob)}</td>
+      <td style="padding:12px 16px; color:#cbd5e1;">${esc(c.rice)}</td>
+      <td style="padding:12px 16px; color:#cbd5e1;">${fmtNum(c.qty)}</td>
+      <td style="padding:12px 16px; color:#f59e0b; font-weight:800;">${fmt(c.total)}</td>
+      <td style="padding:12px 16px; color:#34d399; font-weight:700;">${fmt(c.totalPaid)}</td>
+      <td style="padding:12px 16px; color:#f87171; font-weight:800;">${fmt(c.balance)}</td>
+      <td style="padding:12px 16px;"><span class="badge badge-yellow">${esc(c.day)}</span></td>
+      <td style="padding:12px 16px;">${badge}</td>
+      <td style="padding:12px 16px;">
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="btn-blue" onclick="openEdit('${c.id}')">✏️ Edit</button>
+          <button class="btn-red" onclick="reqDel('${c.id}','credit')">🗑️</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ============================================================
+// EDIT / PAYMENT MODAL
+// ============================================================
+function openEdit(id) {
+  const credits = DB.get('credits');
+  const rec = credits.find(c => c.id === id);
+  if (!rec) return;
+  editId = id;
+  txt('e-name', rec.name);
+  txt('e-mob', rec.mob);
+  txt('e-rice', rec.rice);
+  txt('e-addr', rec.addr);
+  txt('e-cnic', rec.cnic || '—');
+  txt('e-total', fmt(rec.total));
+  txt('e-paid', fmt(rec.totalPaid));
+  txt('e-bal', fmt(rec.balance));
+  el('e-pay').value = '';
+  el('e-note').value = '';
+  hide('e-pay-err');
+  renderPayHist(rec);
+  hide('pay-hist-body');
+  el('hist-arrow').textContent = '▼';
+  showFlex('m-edit');
+  setTimeout(() => el('e-pay').focus(), 80);
+}
+
+function renderPayHist(rec) {
+  const rows = el('pay-hist-rows');
+  const ph = rec.payHist || [];
+  if (!ph.length) {
+    rows.innerHTML = '<tr><td colspan="3" style="padding:12px; text-align:center; color:#334155; font-size:12px;">No payment history.</td></tr>';
+    return;
+  }
+  rows.innerHTML = [...ph].reverse().map(p => `
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+      <td style="padding:8px 10px; color:#475569; font-size:11.5px; white-space:nowrap;">${fmtDate(p.ts)}</td>
+      <td style="padding:8px 10px; color:#34d399; font-weight:700; white-space:nowrap;">${fmt(p.amount)}</td>
+      <td style="padding:8px 10px; color:#64748b;">${esc(p.note || '—')}</td>
+    </tr>`).join('');
+}
+
+function togglePayHist() {
+  const body = el('pay-hist-body');
+  const arrow = el('hist-arrow');
+  const isHidden = body.style.display === 'none' || body.style.display === '';
+  body.style.display = isHidden ? 'block' : 'none';
+  arrow.textContent = isHidden ? '▲' : '▼';
+}
+
+function closeEdit() { hide('m-edit'); editId = null; }
+
+function validatePay() {
+  const credits = DB.get('credits');
+  const rec = credits.find(c => c.id === editId);
+  if (!rec) return;
+  const amount = parseFloat(el('e-pay').value) || 0;
+  const errEl = el('e-pay-err');
+  if (amount > rec.balance) {
+    errEl.textContent = `⚠️ Error: Entered amount cannot exceed the remaining balance of ${fmt(rec.balance)}!`;
+    show('e-pay-err');
+  } else {
+    hide('e-pay-err');
+  }
+}
+
+function savePayment() {
+  if (!editId) return;
+  const credits = DB.get('credits');
+  const idx = credits.findIndex(c => c.id === editId);
+  if (idx === -1) return;
+  const rec = credits[idx];
+  const amount = parseFloat(el('e-pay').value);
+  const note = el('e-note').value.trim();
+  if (!amount || amount <= 0) {
+    alert('Please enter a valid payment amount greater than 0.');
+    return;
+  }
+  if (amount > rec.balance) {
+    alert(`Error: Entered amount cannot exceed the remaining balance of ${fmt(rec.balance)}!`);
+    return;
+  }
+  const now = Date.now();
+  rec.totalPaid = (rec.totalPaid || 0) + amount;
+  rec.balance = Math.max(0, rec.balance - amount);
+  if (!rec.payHist) rec.payHist = [];
+  rec.payHist.push({ amount, note, ts: now });
+  // Save edit to history log
+  const hist = pruneHist(DB.get('editHist'));
+  hist.push({ hid: uid(), creditId: rec.id, name: rec.name, day: rec.day, amount, balAfter: rec.balance, note, ts: now });
+  DB.set('editHist', hist);
+  credits[idx] = rec;
+  DB.set('credits', credits);
+  closeEdit();
+  renderCreditTable();
+  filterDay(); // refresh search results if open
+  alert(`✅ Payment of ${fmt(amount)} recorded!\nNew Remaining Balance: ${fmt(rec.balance)}`);
+}
+
+function pruneHist(hist) {
+  const cutoff = Date.now() - 10 * 24 * 60 * 60 * 1000;
+  return hist.filter(h => h.ts >= cutoff);
+}
+
+// ============================================================
+// DELETE SYSTEM
+// ============================================================
+function reqDel(id, type) {
+  pendingDelId = id;
+  pendingDelType = type;
+  el('del-key').value = '';
+  hide('del-err');
+  showFlex('m-delete');
+  setTimeout(() => el('del-key').focus(), 80);
+}
+
+function confirmDelete() {
+  if (el('del-key').value !== DEL_KEY) {
+    show('del-err');
+    el('del-key').value = '';
+    return;
+  }
+  const now = Date.now();
+  if (pendingDelType === 'cash') {
+    const arr = DB.get('cash');
+    const rec = arr.find(x => x.id === pendingDelId);
+    if (rec) {
+      const log = DB.get('delLog');
+      log.push({ ...rec, delAt: now, delType: 'CASH' });
+      DB.set('delLog', log);
+      DB.set('cash', arr.filter(x => x.id !== pendingDelId));
+      renderCashTable();
+    }
+  } else if (pendingDelType === 'credit') {
+    const arr = DB.get('credits');
+    const rec = arr.find(x => x.id === pendingDelId);
+    if (rec) {
+      const log = DB.get('delLog');
+      log.push({ ...rec, delAt: now, delType: 'CREDIT' });
+      DB.set('delLog', log);
+      DB.set('credits', arr.filter(x => x.id !== pendingDelId));
+      renderCreditTable();
+      filterDay();
+    }
+  }
+  cancelDelete();
+}
+
+function cancelDelete() {
+  hide('m-delete');
+  pendingDelId = null;
+  pendingDelType = null;
+}
+
+// ============================================================
+// SEARCH / COLLECTION ROUTING
+// ============================================================
+function filterDay() {
+  const day = val('s-day');
+  const actBar = el('s-actions');
+  const results = el('s-results');
+  const emptyMsg = el('s-empty');
+  if (!day) {
+    actBar.style.display = 'none';
+    hide('s-results');
+    hide('s-empty');
+    el('s-count').textContent = 'Select a day to view assigned customers.';
+    filteredList = [];
+    return;
+  }
+  const credits = DB.get('credits');
+  filteredList = credits.filter(c => c.day === day);
+  actBar.style.display = 'flex';
+  if (!filteredList.length) {
+    hide('s-results');
+    show('s-empty');
+    el('s-count').textContent = `No customers found for ${day}.`;
+  } else {
+    hide('s-empty');
+    show('s-results');
+    el('s-count').textContent = `${filteredList.length} customer(s) assigned to ${day}`;
+    renderSearchTable();
+  }
+  updateSelBtns();
+}
+
+function renderSearchTable() {
+  el('s-tbody').innerHTML = filteredList.map((c, i) => {
+    const cleared = c.balance <= 0;
+    const badge = cleared ? '<span class="badge badge-green">CLEARED</span>' : '<span class="badge badge-red">PENDING</span>';
+    return `
+    <tr class="trow" id="srow-${c.id}">
+      <td style="padding:12px 16px; text-align:center;">
+        <input type="checkbox" class="rcb" data-id="${c.id}" onchange="updateSelBtns()">
+      </td>
+      <td style="padding:12px 10px; color:#64748b;">${i + 1}</td>
+      <td style="padding:12px 10px; font-weight:700;">${esc(c.name)}</td>
+      <td style="padding:12px 10px; color:#94a3b8;">${esc(c.mob)}</td>
+      <td style="padding:12px 10px; color:#cbd5e1; font-size:13px;">${esc(c.addr)}</td>
+      <td style="padding:12px 10px; color:#cbd5e1;">${esc(c.rice)}</td>
+      <td style="padding:12px 10px; color:#f59e0b; font-weight:700;">${fmt(c.total)}</td>
+      <td style="padding:12px 10px; color:#f87171; font-weight:900; font-size:15px;">${fmt(c.balance)}</td>
+      <td style="padding:12px 10px;">${badge}</td>
+      <td style="padding:12px 10px;">
+        <button class="btn-blue" onclick="openEdit('${c.id}')">✏️ Edit</button>
+      </td>
+    </tr>`;
+  }).join('');
+  el('sel-all').checked = false;
+}
+
+function toggleAll() {
+  const master = el('sel-all').checked;
+  document.querySelectorAll('.rcb').forEach(cb => cb.checked = master);
+  updateSelBtns();
+}
+
+function getSelIds() {
+  return [...document.querySelectorAll('.rcb:checked')].map(cb => cb.getAttribute('data-id'));
+}
+
+function updateSelBtns() {
+  const count = getSelIds().length;
+  const all = document.querySelectorAll('.rcb').length;
+  el('sel-all').checked = all > 0 && count === all;
+  el('sel-all').indeterminate = count > 0 && count < all;
+  const ok = count > 0;
+  el('s-export').disabled = !ok;
+  el('s-print').disabled = !ok;
+  el('s-sel-badge').textContent = count > 0 ? `${count} customer(s) selected` : '';
+}
+
+function getSelRecords() {
+  const ids = getSelIds();
+  return filteredList.filter(c => ids.includes(c.id));
+}
+
+// ============================================================
+// EXPORT TO WORD
+// ============================================================
+function exportWord() {
+  const sel = getSelRecords();
+  if (!sel.length) return;
+  const day = val('s-day');
+  const now = new Date().toLocaleString('en-PK');
+  let rows = sel.map((c, i) => `
+    <tr>
+      <td style="border:1px solid #333; padding:6px 10px; font-weight:bold;">${i + 1}</td>
+      <td style="border:1px solid #333; padding:6px 10px; font-weight:600;">${esc(c.name)}</td>
+      <td style="border:1px solid #333; padding:6px 10px;">${esc(c.mob)}</td>
+      <td style="border:1px solid #333; padding:6px 10px;">${esc(c.addr)}</td>
+      <td style="border:1px solid #333; padding:6px 10px;">${esc(c.rice)}</td>
+      <td style="border:1px solid #333; padding:6px 10px; text-align:right;">${fmt(c.total)}</td>
+      <td style="border:1px solid #333; padding:6px 10px; text-align:right; color:red; font-weight:bold;">${fmt(c.balance)}</td>
+      <td style="border:1px solid #333; padding:6px 10px;">${c.balance <= 0 ? 'CLEARED' : 'PENDING'}</td>
+    </tr>`).join('');
+  const totalBal = sel.reduce((a, c) => a + c.balance, 0);
+  const html = `
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">
+<head><meta charset="UTF-8">
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  h1 { text-align: center; font-size: 22pt; letter-spacing: 4px; margin-bottom: 4px; }
+  h2 { text-align: center; font-size: 13pt; margin: 4px 0; font-weight: bold; }
+  p { text-align: center; font-size: 10pt; color: #555; }
+  table { width: 100%; border-collapse: collapse; font-size: 11pt; margin-top: 16px; }
+  th { background: #000; color: #fff; padding: 8px 10px; border: 1px solid #333; text-align: left; }
+  td { padding: 6px 10px; border: 1px solid #333; }
+  tr:nth-child(even) td { background: #f9f9f9; }
+  .total-row td { font-weight: bold; background: #f0f0f0; }
+</style>
+</head>
+<body>
+<h1>LUCKY TRADERS</h1>
+<h2>Collection Route Export — ${esc(day)}</h2>
+<p>Contact: 03009687094 | Generated: ${esc(now)} | Total Customers: ${sel.length}</p>
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Customer Name</th>
+      <th>Mobile</th>
+      <th>Address</th>
+      <th>Rice Type</th>
+      <th>Total Bill</th>
+      <th>Remaining Balance</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>${rows}
+    <tr class="total-row">
+      <td colspan="6" style="text-align:right; padding:8px 10px;">TOTAL OUTSTANDING BALANCE:</td>
+      <td style="padding:8px 10px; color:red; font-size:13pt;">${fmt(totalBal)}</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+<p style="margin-top:20px;">— End of Report — Lucky Traders</p>
+</body></html>`;
+  const blob = new Blob(['\ufeff', html], { type: 'application/msword;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `LuckyTraders_${day}_${Date.now()}.doc`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// PRINT COLLECTION ROUTE SHEET
+// ============================================================
+function printRoute() {
+  const sel = getSelRecords();
+  if (!sel.length) return;
+  const day = val('s-day');
+  const totalBal = sel.reduce((a, c) => a + c.balance, 0);
+  const pa = el('print-area');
+  pa.style.display = 'block';
+  const rows = sel.map((c, i) => `
+    <tr style="border-bottom:1px solid #ccc;">
+      <td style="padding:9px 8px; font-weight:bold; border:1px solid #ccc;">${i + 1}</td>
+      <td style="padding:9px 8px; font-weight:700; border:1px solid #ccc;">${esc(c.name)}</td>
+      <td style="padding:9px 8px; border:1px solid #ccc;">${esc(c.mob)}</td>
+      <td style="padding:9px 8px; border:1px solid #ccc;">${esc(c.addr)}</td>
+      <td style="padding:9px 8px; font-weight:900; color:#c00; font-size:13px; text-align:center; border:1px solid #ccc; white-space:nowrap;">Rs. ${fmtNum(c.balance)}</td>
+      <td style="padding:9px 8px; border:2px solid #333; min-width:120px;">&nbsp;</td>
+    </tr>`).join('');
+  pa.innerHTML = `
+  <div style="font-family:Arial,sans-serif; padding:28px; background:#fff; color:#000;">
+    <div style="text-align:center; border-bottom:3px double #000; padding-bottom:16px; margin-bottom:18px;">
+      <div style="font-size:26px; font-weight:900; letter-spacing:5px; text-transform:uppercase; margin-bottom:5px;">LUCKY TRADERS</div>
+      <div style="font-size:15px; font-weight:800; margin-bottom:5px; letter-spacing:2px;">OFFICIAL COLLECTION ROUTE SHEET</div>
+      <div style="font-size:12px; margin-bottom:3px;">Contact: 03009687094 &nbsp;|&nbsp; Scheduled Recovery Day: <b>${esc(day)}</b></div>
+      <div style="font-size:11px; color:#555;">Generated: ${new Date().toLocaleString('en-PK')} &nbsp;|&nbsp; Total Customers: ${sel.length}</div>
+    </div>
+    <table style="width:100%; border-collapse:collapse; font-size:12px;">
+      <thead>
+        <tr style="background:#000; color:#fff;">
+          <th style="padding:10px 8px; text-align:left; border:1px solid #333;">#</th>
+          <th style="padding:10px 8px; text-align:left; border:1px solid #333;">Customer / Shop Name</th>
+          <th style="padding:10px 8px; text-align:left; border:1px solid #333;">Mobile Number</th>
+          <th style="padding:10px 8px; text-align:left; border:1px solid #333;">Address</th>
+          <th style="padding:10px 8px; text-align:center; border:1px solid #333;">Remaining Balance<br><span style="font-size:10px; font-weight:400;">(Baqaya Raqam)</span></th>
+          <th style="padding:10px 8px; text-align:center; border:2px solid #fff; min-width:120px;">Collected Amount Notes<br><span style="font-size:10px; font-weight:400;">(Write here)</span></th>
+        </tr>
+      </thead>
+      <tbody>${rows}
+        <tr>
+          <td colspan="4" style="padding:10px 8px; text-align:right; font-weight:900; border:1px solid #ccc; font-size:13px;">TOTAL OUTSTANDING:</td>
+          <td style="padding:10px 8px; font-weight:900; color:#c00; font-size:14px; text-align:center; border:1px solid #ccc;">Rs. ${fmtNum(totalBal)}</td>
+          <td style="border:2px solid #333;"></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:26px; border-top:2px solid #000; padding-top:14px; display:flex; justify-content:space-between; font-size:12px;">
+      <div>
+        <div style="margin-bottom:8px;"><b>Recovery Agent Name:</b> ___________________________</div>
+        <div><b>Supervisor Verification:</b> ___________________________</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="margin-bottom:8px;"><b>Agent Signature:</b> ___________________________</div>
+        <div><b>Date / Time:</b> ___________________________</div>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:16px; font-size:11px; color:#555; border-top:1px dashed #ccc; padding-top:10px;">
+      Lucky Traders — Official Document | Unauthorized distribution is prohibited.
+    </div>
+  </div>`;
+  window.print();
+  setTimeout(() => { pa.style.display = 'none'; pa.innerHTML = ''; }, 2000);
+}
+
+// ============================================================
+// ADMIN DASHBOARD
+// ============================================================
+const ADM_TABS = ['cash', 'credit', 'personal'];
+const CADM_TABS = ['nil', 'deleted', 'history', 'details'];
+
+function switchAdm(name) {
+  ADM_TABS.forEach(t => {
+    const panel = el('adm-' + t);
+    if (panel) panel.style.display = 'none';
+    const btn = el('atab-' + t);
+    if (btn) btn.className = 'atab off';
+  });
+  const panel = el('adm-' + name);
+  if (panel) panel.style.display = '';
+  const btn = el('atab-' + name);
+  if (btn) btn.className = 'atab on';
+  if (name === 'cash') renderAdmCash();
+  if (name === 'credit') renderAdmCredit();
+  if (name === 'personal') renderAdmPersonal();
+}
+
+function switchCAdm(name) {
+  CADM_TABS.forEach(t => {
+    hide('cadm-' + t);
+    const b = el('ctab-' + t);
+    if (b) b.className = 'atab off';
+  });
+  show('cadm-' + name);
+  el('ctab-' + name).className = 'atab on';
+}
+
+function renderAdmCash() {
+  const arr = DB.get('cash');
+  const now = new Date();
+  const wCut = now.getTime() - 7 * 24 * 60 * 60 * 1000;
+  const mCut = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  const yCut = new Date(now.getFullYear(), 0, 1).getTime();
+  const sumArr = (a, prop) => a.reduce((t, s) => t + (s[prop] || 0), 0);
+  const wArr = arr.filter(s => s.ts >= wCut);
+  const mArr = arr.filter(s => s.ts >= mCut);
+  const yArr = arr.filter(s => s.ts >= yCut);
+  txt('ac-wrev', fmt(sumArr(wArr,'total')));
+  txt('ac-wqty', fmtNum(sumArr(wArr,'qty')) + ' kg sold this week');
+  txt('ac-wcnt', wArr.length + ' transaction' + (wArr.length !== 1 ? 's' : ''));
+  txt('ac-mrev', fmt(sumArr(mArr,'total')));
+  txt('ac-mqty', fmtNum(sumArr(mArr,'qty')) + ' kg sold this month');
+  txt('ac-mcnt', mArr.length + ' transaction' + (mArr.length !== 1 ? 's' : ''));
+  txt('ac-yrev', fmt(sumArr(yArr,'total')));
+  txt('ac-yqty', fmtNum(sumArr(yArr,'qty')) + ' kg sold this year');
+  txt('ac-ycnt', yArr.length + ' transaction' + (yArr.length !== 1 ? 's' : ''));
+  const tbody = el('ac-tbody');
+  if (!arr.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:40px; color:#334155;">No cash sales yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = [...arr].reverse().map((s, i) => `
+    <tr class="trow">
+      <td style="padding:11px 16px; color:#64748b;">${arr.length - i}</td>
+      <td style="padding:11px 16px; color:#475569; font-size:12px; white-space:nowrap;">${fmtDate(s.ts)}</td>
+      <td style="padding:11px 16px; font-weight:700;">${esc(s.name)}</td>
+      <td style="padding:11px 16px; color:#94a3b8;">${esc(s.mob)}</td>
+      <td style="padding:11px 16px; color:#cbd5e1;">${esc(s.rice)}</td>
+      <td style="padding:11px 16px; color:#cbd5e1;">${fmtNum(s.qty)}</td>
+      <td style="padding:11px 16px; color:#f59e0b; font-weight:800;">${fmt(s.total)}</td>
+      <td style="padding:11px 16px; color:#94a3b8;">${esc(s.loc)}</td>
+    </tr>`).join('');
+}
+
+function renderAdmCredit() {
+  const credits = DB.get('credits');
+  const totalRev = credits.reduce((a,c) => a + (c.total||0), 0);
+  const totalDebt = credits.reduce((a,c) => a + (c.balance||0), 0);
+  const totalRec = credits.reduce((a,c) => a + (c.totalPaid||0), 0);
+  txt('ccm-rev', fmt(totalRev));
+  txt('ccm-debt', fmt(totalDebt));
+  txt('ccm-rec', fmt(totalRec));
+  txt('ccm-cnt', credits.length);
+  txt('det-rev', fmt(totalRev));
+  txt('det-debt', fmt(totalDebt));
+  // NIL
+  const nilArr = credits.filter(c => c.balance <= 0);
+  const nilBody = el('nil-tbody');
+  if (!nilArr.length) { nilBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:40px; color:#334155;">No cleared accounts yet.</td></tr>'; }
+  else nilBody.innerHTML = nilArr.map(c => `
+    <tr class="trow">
+      <td style="padding:11px 16px; font-weight:700;">${esc(c.name)}</td>
+      <td style="padding:11px 16px; color:#94a3b8;">${esc(c.mob)}</td>
+      <td style="padding:11px 16px; color:#cbd5e1;">${esc(c.rice)}</td>
+      <td style="padding:11px 16px; color:#cbd5e1;">${fmtNum(c.qty)}</td>
+      <td style="padding:11px 16px; color:#f59e0b; font-weight:800;">${fmt(c.total)}</td>
+      <td style="padding:11px 16px;"><span class="badge badge-yellow">${esc(c.day)}</span></td>
+      <td style="padding:11px 16px; color:#475569; font-size:12px;">${fmtDate(c.ts)}</td>
+      <td style="padding:11px 16px;"><span class="badge badge-green">FULLY CLEARED</span></td>
+    </tr>`).join('');
+  // Deleted Log
+  const delLog = DB.get('delLog');
+  const delBody = el('del-tbody');
+  if (!delLog.length) { delBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:#334155;">No deleted records.</td></tr>'; }
+  else delBody.innerHTML = [...delLog].reverse().map(d => `
+    <tr class="trow">
+      <td style="padding:11px 16px; color:#475569; font-size:12px; white-space:nowrap;">${fmtDate(d.delAt)}</td>
+      <td style="padding:11px 16px; font-weight:700;">${esc(d.name)}</td>
+      <td style="padding:11px 16px; color:#94a3b8;">${esc(d.mob||'')}</td>
+      <td style="padding:11px 16px; color:#cbd5e1;">${esc(d.rice||'')}</td>
+      <td style="padding:11px 16px; color:#f59e0b; font-weight:800;">${fmt(d.total)}</td>
+      <td style="padding:11px 16px; color:#f87171; font-weight:700;">${fmt(d.balance||0)}</td>
+      <td style="padding:11px 16px;"><span class="badge badge-yellow">${esc(d.delType||'RECORD')}</span></td>
+    </tr>`).join('');
+  // History (pruned to 10 days)
+  const rawHist = pruneHist(DB.get('editHist'));
+  DB.set('editHist', rawHist);
+  const histBody = el('hist-tbody');
+  if (!rawHist.length) { histBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:40px; color:#334155;">No edit history in last 10 days.</td></tr>'; }
+  else histBody.innerHTML = [...rawHist].reverse().map(h => `
+    <tr class="trow">
+      <td style="padding:11px 16px; color:#475569; font-size:12px; white-space:nowrap;">${fmtDate(h.ts)}</td>
+      <td style="padding:11px 16px; font-weight:700;">${esc(h.name)}</td>
+      <td style="padding:11px 16px;"><span class="badge badge-yellow">${esc(h.day)}</span></td>
+      <td style="padding:11px 16px; color:#34d399; font-weight:800;">${fmt(h.amount)}</td>
+      <td style="padding:11px 16px; color:#f87171; font-weight:700;">${fmt(h.balAfter)}</td>
+      <td style="padding:11px 16px; color:#64748b;">${esc(h.note||'—')}</td>
+    </tr>`).join('');
+}
+
+function renderAdmPersonal() {
+  const cash = DB.get('cash');
+  const credits = DB.get('credits');
+  const cRev = cash.reduce((a,s) => a + (s.total||0), 0);
+  const crRev = credits.reduce((a,c) => a + (c.total||0), 0);
+  const consolidated = cRev + crRev;
+  const cQty = cash.reduce((a,s) => a + (s.qty||0), 0);
+  const crQty = credits.reduce((a,c) => a + (c.qty||0), 0);
+  const totalQty = cQty + crQty;
+  const debt = credits.reduce((a,c) => a + (c.balance||0), 0);
+  const crPayments = credits.reduce((a,c) => a + (c.totalPaid||0), 0);
+  const totalColl = cRev + crPayments;
+  txt('pa-rev', fmt(consolidated));
+  txt('pa-qty', fmtNum(totalQty) + ' kg');
+  txt('pa-coll', fmt(totalColl));
+  txt('pa-debt', fmt(debt));
+  txt('pa-cc', cash.length);
+  txt('pa-crc', credits.length);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+el('login-pw').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+el('login-pw').focus();
+</script>
+</body>
+</html>
